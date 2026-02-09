@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Casino — BOOM & DICE</title>
+
+<style>
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(120% 100% at 50% 0%, #1a2f6b 0%, #0a1028 60%, #060914 100%);
+  color: #eaf6ff;
+  font-weight: bold;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #1b2f6a, #101b3a);
+  box-shadow: 0 8px 30px rgba(0,0,0,.6);
+  position: relative;
+  z-index: 10;
+}
+
+.avatar { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.12); }
+
+.menu-back {
+  display: none;
+  margin-left: 12px;
+  padding: 12px 24px;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 18px;
+  background: linear-gradient(180deg, #2a3f7f, #1a2550);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 6px 20px rgba(0,0,0,.6);
+}
+
+.balance {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 28px;
+  font-size: 22px;
+  background: linear-gradient(180deg, #2d8cff, #1f6fff);
+  box-shadow: 0 6px 20px rgba(45,140,255,.6);
+}
+
+.coin-icon { width: 36px; height: 36px; margin-right: 10px; }
+
+.menu {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.game-btn {
+  height: 22vh;
+  position: relative;
+  border-radius: 28px;
+  cursor: pointer;
+  background: linear-gradient(180deg, #1c2d66, #141d44);
+  border: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), inset 0 -10px 16px rgba(0,0,0,.6), 0 12px 40px rgba(0,0,0,.7);
+  overflow: hidden;
+}
+
+.game-btn img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .85;
+}
+
+.game-btn span {
+  position: relative;
+  z-index: 2;
+  font-size: 54px;
+  color: #fff;
+  text-shadow: 0 2px 8px #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* DICE стили */
+#dice-game { display: none; padding: 16px; }
+
+#dice-game h1 { font-size: 32px; margin: 0 0 20px; text-align: center; }
+
+.row { display: flex; gap: 12px; margin-bottom: 16px; }
+.input-group { flex: 1; }
+
+label { font-size: 14px; opacity: 0.8; margin-bottom: 6px; display: block; }
+
+.input-box {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), 0 0 14px rgba(66,165,245,0.25);
+}
+
+.input-box input {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #fff;
+}
+
+.input-actions { display: flex; border-top: 1px solid rgba(255,255,255,0.12); }
+
+.input-actions button {
+  flex: 1;
+  padding: 8px;
+  background: linear-gradient(180deg, #42a5f5, #1e88e5);
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.payout {
+  margin: 16px 0;
+  padding: 14px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 18px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.payout b { font-size: 20px; }
+
+.buttons { display: flex; gap: 14px; margin: 20px 0; }
+
+.buttons button {
+  flex: 1;
+  padding: 18px;
+  font-size: 20px;
+  font-weight: 900;
+  border-radius: 28px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(180deg, #42a5f5, #1e88e5);
+  box-shadow: 0 0 20px rgba(66,165,245,0.6), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.buttons button:active { transform: scale(0.97); }
+
+.win-btn  { background: linear-gradient(180deg, #66bb6a, #2e7d32) !important; box-shadow: 0 0 30px rgba(102,187,106,0.8); }
+.lose-btn { background: linear-gradient(180deg, #ef5350, #b71c1c) !important; box-shadow: 0 0 30px rgba(239,83,80,0.8); }
+
+.result {
+  margin-top: 16px;
+  padding: 14px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 18px;
+  font-size: 15px;
+  text-align: center;
+  min-height: 60px;
+}
+
+.history {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 18px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+/* BOOM стили */
+#boom-game { display: none; padding: 16px; }
+
+.win-info {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 16px;
+  background: rgba(15,25,60,.55);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  gap: 10px;
+}
+
+.cell {
+  aspect-ratio: 1/1;
+  border-radius: 14px;
+  background: linear-gradient(180deg,#1c2d66,#141d44);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -6px 12px rgba(0,0,0,.6), 0 6px 20px rgba(0,0,0,.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cell img { width: 80%; height: 80%; }
+
+.cell.safe  { background: linear-gradient(180deg,#2fbf8f,#1f8f6a); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 0 14px rgba(47,191,143,.55); }
+.cell.boom  { background: linear-gradient(180deg,#c63a3a,#7a1e1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 10px 25px rgba(198,58,58,.6); }
+
+.controls {
+  margin-top: 16px;
+  background: rgba(15,25,60,.55);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.bet-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.bet-row input, .bet-row button {
+  flex: 1;
+  font-size: 20px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg,#2a3f7f,#1a2550);
+  color: #fff;
+  border: none;
+  text-align: center;
+}
+
+.slider {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.slider input[type="range"] {
+  width: 100% !important;           /* сделан максимально широким */
+  height: 12px;
+}
+
+.play-btn, .cashout-btn {
+  width: 100%;
+  font-size: 24px;
+  padding: 18px;
+  border: none;
+  border-radius: 28px;
+  margin-top: 12px;
+  cursor: pointer;
+  color: white;
+}
+
+.play-btn  { background: linear-gradient(180deg,#4aa3ff,#1e6bff); }
+.play-btn.disabled { opacity: 0.5; pointer-events: none; }
+.cashout-btn { background: linear-gradient(180deg,#3edc8b,#1fae63); }
+
+@media (max-width: 500px) {
+  .game-btn { height: 20vh; }
+  .game-btn span { font-size: 48px; }
+  #dice-game h1 { font-size: 28px; }
+  .buttons button { font-size: 18px; padding: 16px; }
+  .win-info { font-size: 22px; }
+  .play-btn, .cashout-btn { font-size: 22px; padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="avatar"></div>
+  <div class="menu-back" id="menuBack" onclick="backToMenu()">в меню 🎰</div>
+  <div class="balance">
+    <img src="coin.png" class="coin-icon">
+    <span id="balance">1000.00</span>
+  </div>
+</div>
+
+<div class="menu" id="menu">
+  <button class="game-btn" onclick="enterGame('boom')">
+    <img src="boom-icon.png" alt="">
+    <span>BOOM</span>
+  </button>
+  <button class="game-btn" onclick="enterGame('dice')">
+    <img src="dice.png" alt="DICE">
+    <span>DICE</span>
+  </button>
+</div>
+
+<div id="boom-game">
+  <div class="win-info">
+    Возможный выигрыш<br>
+    <span id="possibleWin">0.00</span><br>
+    x<span id="multiplier">1.00</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="controls">
+    <div class="bet-row">
+      <button onclick="halfBet()">½</button>
+      <input id="bet" type="text" value="1" oninput="formatBet()">
+      <button onclick="doubleBet()">2×</button>
+    </div>
+
+    <div class="slider">
+      Бомб: <span id="bombCount">3</span><br>
+      <input id="bombSlider" type="range" min="2" max="10" value="3" oninput="setBombs(this.value)">
+    </div>
+
+    <button class="play-btn disabled" id="playBtn" onclick="playBoom()">Играть</button>
+    <button class="cashout-btn" id="cashoutBtn" onclick="cashOut()" style="display:none">
+      Забрать выигрыш
+    </button>
+  </div>
+</div>
+
+<div id="dice-game">
+  <h1>🎲 DICE</h1>
+
+  <div class="row">
+    <div class="input-group">
+      <label>Ставка</label>
+      <div class="input-box">
+        <input id="betDice" value="1">
+        <div class="input-actions">
+          <button onclick="halfBetDice()">½</button>
+          <button onclick="doubleBetDice()">x2</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Шанс %</label>
+      <div class="input-box">
+        <input id="chance" value="50">
+        <div class="input-actions">
+          <button onclick="halfChance()">½</button>
+          <button onclick="doubleChance()">x2</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="payout">Возможный выигрыш: <b id="payout">0</b></div>
+
+  <div class="buttons">
+    <button id="lessBtn"  onclick="playDice('less')">МЕНЬШЕ</button>
+    <button id="moreBtn" onclick="playDice('more')">БОЛЬШЕ</button>
+  </div>
+
+  <div class="result" id="resultDice">Сделай ставку</div>
+  <div class="history" id="historyDice"><b>История ставок</b></div>
+</div>
+
+<script>
+// ── ОБЩИЙ БАЛАНС ────────────────────────────────────────
+let balance = Number(localStorage.getItem('casinoBalance')) || 1000;
+
+function updateAllBalances() {
+  const val = balance.toFixed(2);
+  document.getElementById('balance').textContent = val;
+  localStorage.setItem('casinoBalance', balance);
+}
+
+// ── НАВИГАЦИЯ ────────────────────────────────────────────
+function backToMenu() {
+  document.getElementById('menu').style.display = 'flex';
+  document.getElementById('boom-game').style.display = 'none';
+  document.getElementById('dice-game').style.display = 'none';
+  document.getElementById('menuBack').style.display = 'none';
+}
+
+function enterGame(game) {
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('menuBack').style.display = 'block';
+  document.getElementById(game + '-game').style.display = 'block';
+  updateAllBalances();
+
+  if (game === 'boom') {
+    buildGrid();
+    validateBetBoom();
+  } else if (game === 'dice') {
+    updatePayout();
+  }
+}
+
+// ── BOOM ─────────────────────────────────────────────────
+const multiplierTable = {
+  2: { base: [1.05,1.15,1.27,1.41,1.58,1.78], step: 0.22 },
+  3: { base: [1.07,1.22,1.40,1.62,1.90,2.25], step: 0.35 },
+  4: { base: [1.10,1.30,1.55,1.90,2.40], step: 0.55 },
+  5: { base: [1.12,1.40,1.78,2.32,3.10], step: 0.80 },
+  6: { base: [1.15,1.50,2.00,2.75], step: 1.10 },
+  7: { base: [1.18,1.65,2.45,3.90], step: 1.60 },
+  8: { base: [1.22,1.80,2.90], step: 2.20 },
+  9: { base: [1.25,1.95,3.20], step: 2.80 },
+  10: { base: [1.28,2.05,3.45], step: 3.50 }
+};
+
+let betValue = 0, playing = false, opened = 0, multiplierBoom = 1;
+let bombs = [], bombsCount = 3;
+let boomClickCounter = 0;
+
+const grid = document.getElementById('grid');
+const possibleWin = document.getElementById('possibleWin');
+const multiplierEl = document.getElementById('multiplier');
+const playBtn = document.getElementById('playBtn');
+const cashoutBtn = document.getElementById('cashoutBtn');
+const bombSlider = document.getElementById('bombSlider');
+
+function buildGrid() {
+  grid.innerHTML = '';
+  boomClickCounter = 0;
+  for (let i = 0; i < 25; i++) {
+    const c = document.createElement('div');
+    c.className = 'cell disabled';
+    c.onclick = () => openCell(c, i);
+    grid.appendChild(c);
+  }
+}
+
+function setBombs(v) {
+  bombsCount = +v;
+  document.getElementById('bombCount').innerText = v;
+}
+
+function formatBet() {
+  let v = bet.value.replace(',', '.').replace(/[^0-9.]/g, '');
+  if (v.includes('.')) { const [a,b] = v.split('.'); v = a + '.' + b.slice(0,2); }
+  bet.value = v;
+  validateBetBoom();
+}
+
+function validateBetBoom() {
+  betValue = parseFloat(bet.value) || 0;
+  if (betValue >= 1 && betValue <= balance && !playing) {
+    playBtn.classList.remove('disabled');
+  } else {
+    playBtn.classList.add('disabled');
+  }
+}
+
+function halfBet()  { bet.value = (Math.max(1, betValue/2)).toFixed(2); formatBet(); }
+function doubleBet(){ bet.value = (Math.min(balance, betValue*2)).toFixed(2); formatBet(); }
+
+function playBoom() {
+  if (playBtn.classList.contains('disabled')) return;
+
+  balance -= betValue;
+  updateAllBalances();
+
+  opened = 0; multiplierBoom = 1;
+  possibleWin.innerText = '0.00'; multiplierEl.innerText = '1.00';
+
+  bombs = []; playing = true; boomClickCounter = 0;
+  playBtn.classList.add('disabled');
+  bombSlider.disabled = true;
+
+  document.querySelectorAll('.cell').forEach(c => {
+    c.innerHTML = ''; c.classList.remove('disabled','safe','boom');
+  });
+
+  while (bombs.length < bombsCount) {
+    const r = Math.floor(Math.random()*25);
+    if (!bombs.includes(r)) bombs.push(r);
+  }
+}
+
+function updateMultiplier() {
+  const t = multiplierTable[bombsCount];
+  const i = opened - 1;
+  multiplierBoom = i < t.base.length ? t.base[i] : t.base[t.base.length-1] + t.step * (i - t.base.length + 1);
+}
+
+function openCell(c, i) {
+  if (!playing || c.innerHTML) return;
+
+  boomClickCounter++;
+
+  let isBoom = bombs.includes(i);
+
+  // Каждое второе нажатие — доп. 39% шанс взрыва
+  if (boomClickCounter % 2 === 0 && Math.random() < 0.39) {
+    isBoom = true;
+  }
+
+  if (isBoom) {
+    c.classList.add('boom');
+    c.innerHTML = '<img src="bomb.png">';
+    playing = false;
+    bombSlider.disabled = false;
+    validateBetBoom();
+    cashoutBtn.style.display = 'none';
+    return;
+  }
+
+  opened++;
+  updateMultiplier();
+  c.classList.add('safe');
+  c.innerHTML = '<img src="coin.png">';
+  possibleWin.innerText = (betValue * multiplierBoom).toFixed(2);
+  multiplierEl.innerText = multiplierBoom.toFixed(2);
+  cashoutBtn.style.display = 'block';
+}
+
+function cashOut() {
+  balance += betValue * multiplierBoom;
+  updateAllBalances();
+  playing = false;
+  bombSlider.disabled = false;
+  cashoutBtn.style.display = 'none';
+  validateBetBoom();
+}
+
+// ── DICE ─────────────────────────────────────────────────
+const betDiceInput   = document.getElementById('betDice');
+const chanceInput    = document.getElementById('chance');
+const payoutEl       = document.getElementById('payout');
+const resultDiceEl   = document.getElementById('resultDice');
+const historyDiceEl  = document.getElementById('historyDice');
+const lessBtn        = document.getElementById('lessBtn');
+const moreBtn        = document.getElementById('moreBtn');
+
+let diceGameCounter = 0;
+
+function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+function multiplier(chance) { return (100 / chance) * 0.99; }
+
+function validateBetDice() {
+  if (!/^\d+(\.\d{1,2})?$/.test(betDiceInput.value)) return false;
+  const v = Number(betDiceInput.value);
+  return v >= 1 && v <= balance;
+}
+
+function validateChance() {
+  if (!/^\d+$/.test(chanceInput.value)) return false;
+  const v = Number(chanceInput.value);
+  return v >= 1 && v <= 95;
+}
+
+function updatePayout() {
+  if (validateBetDice() && validateChance()) {
+    payoutEl.textContent = (Number(betDiceInput.value) * multiplier(Number(chanceInput.value))).toFixed(2);
+  } else {
+    payoutEl.textContent = '0';
+  }
+}
+
+betDiceInput.addEventListener('input', updatePayout);
+chanceInput.addEventListener('input', updatePayout);
+
+function halfBetDice() {
+  if (validateBetDice()) {
+    betDiceInput.value = (Number(betDiceInput.value)/2).toFixed(2);
+    updatePayout();
+  }
+}
+
+function doubleBetDice() {
+  if (validateBetDice()) {
+    betDiceInput.value = Math.min(balance, Number(betDiceInput.value)*2).toFixed(2);
+    updatePayout();
+  }
+}
+
+function halfChance() {
+  chanceInput.value = Math.max(1, Math.floor(Number(chanceInput.value)/2));
+  updatePayout();
+}
+
+function doubleChance() {
+  chanceInput.value = Math.min(95, Number(chanceInput.value)*2);
+  updatePayout();
+}
+
+function resetButtons() {
+  lessBtn.classList.remove('win-btn','lose-btn');
+  moreBtn.classList.remove('win-btn','lose-btn');
+}
+
+function playDice(type) {
+  resetButtons();
+  vibrate(30);
+
+  if (!validateBetDice()) {
+    resultDiceEl.innerHTML = '<span style="color:#ef5350">неправильно указана ставка</span>';
+    return;
+  }
+  if (!validateChance()) {
+    resultDiceEl.innerHTML = '<span style="color:#ef5350">неправильно указан шанс</span>';
+    return;
+  }
+
+  const bet = Number(betDiceInput.value);
+  const chance = Number(chanceInput.value);
+
+  resultDiceEl.textContent = '🎲 Бросаем кости...';
+  lessBtn.disabled = moreBtn.disabled = true;
+
+  setTimeout(() => {
+    balance -= bet;
+    updateAllBalances();
+
+    diceGameCounter++;
+
+    let roll = Math.random() * 100;
+    let realWin = type === 'less' ? roll < chance : roll > (100 - chance);
+
+    // Каждая вторая игра — доп. 39% шанс принудительного проигрыша
+    let forcedLose = (diceGameCounter % 2 === 0) && Math.random() < 0.39;
+
+    let win = realWin && !forcedLose;
+
+    const btn = type === 'less' ? lessBtn : moreBtn;
+
+    if (win) {
+      balance += bet * multiplier(chance);
+      btn.classList.add('win-btn');
+      vibrate([40,60,40]);
+    } else {
+      btn.classList.add('lose-btn');
+      vibrate(200);
+    }
+
+    updateAllBalances();
+
+    resultDiceEl.innerHTML = `Выпало <b>${roll.toFixed(2)}</b><br>
+      <span style="color:${win ? '#66bb6a' : '#ef5350'}">${win ? 'Победа' : 'Проигрыш'}</span>`;
+
+    historyDiceEl.innerHTML += `<div style="color:${win ? '#66bb6a' : '#ef5350'}">
+      ${type.toUpperCase()} | ${bet} | ${roll.toFixed(2)}</div>`;
+
+    lessBtn.disabled = moreBtn.disabled = false;
+  }, 400);
+}
+
+// ── ИНИЦИАЛИЗАЦИЯ ────────────────────────────────────────
+updateAllBalances();
+</script>
+</body>
+</html>
